@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  #ビルド前の処理（ECRにログイン＆イメージ名（ホスト名）を取得）
+  pre_build:
+    commands:
+      - echo 出力したいメッセージ 
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+  #ビルドの実行
+  build:
+    commands:
+      - echo 出力したいメッセージ
+      - docker build -t $REPOSITORY_URI:latest .
+  #イメージをECRにプッシュ（イメージ名とタグをjsonファイルに出力）
+  post_build:
+    commands:
+      - echo 出力したいメッセージ
+      - docker push $REPOSITORY_URI:latest
+$REPOSITORY_URI:latest > imageRepository.json
+artifacts:
+  files: imageRepository.json
